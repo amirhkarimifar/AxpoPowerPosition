@@ -1,0 +1,163 @@
+@page "/"
+@rendermode InteractiveServer
+@using PowerPosition.Dashboard.Services
+@inject LogFileService LogService
+@inject OutputFileService OutputService
+@inject LaunchContext Launch
+@implements IAsyncDisposable
+
+<PageTitle>PowerPosition Monitor</PageTitle>
+
+@if (!Launch.LaunchedByWorker)
+{
+    <div class="standalone-warning">
+        This dashboard was started on its own. Run
+        <code>dotnet run --project src/PowerPosition.Worker</code> instead — it starts the
+        extract schedule <em>and</em> this dashboard together, so there's something to show.
+    </div>
+}
+
+<div class="dashboard-header">
+    <div>
+        <h1>PowerPosition Monitor</h1>
+        <p class="subtitle">@_logFileLabel</p>
+    </div>
+    <div class="header-meta">
+        <span class="meta-pill @(_needsAttention ? "meta-pill--warn" : "meta-pill--ok")">
+            <span class="dot"></span>
+            @(_needsAttention ? "Attention needed" : "Healthy")
+        </span>
+        <span class="meta-pill">Updated @_lastRefreshed.ToString("HH:mm:ss")</span>
+    </div>
+</div>
+
+<section class="panel">
+    <div class="panel-head">
+        <h2>Log</h2>
+        <span class="panel-note">@_logEntries.Count entries &middot; refreshes every 2s</span>
+    </div>
+    <div class="log-panel">
+        @if (_logEntries.Count == 0)
+        {
+            <div class="empty-state">No log entries yet — start the worker to see activity here.</div>
+        }
+        else
+        {
+            @foreach (var entry in _logEntriesNewestFirst)
+            {
+                <div class="log-row log-row--@entry.Level.ToLowerInvariant()">
+                    <span class="log-time">@entry.Timestamp.ToString("HH:mm:ss")</span>
+                    <span class="log-level">@entry.Level</span>
+                    <span class="log-message">@entry.Message</span>
+                </div>
+            }
+        }
+    </div>
+</section>
+
+<section class="panel">
+    <div class="panel-head">
+        <h2>Output files</h2>
+        <span class="panel-note">@_csvFiles.Count CSV files</span>
+    </div>
+    <div class="files-panel">
+        @if (_csvFiles.Count == 0)
+        {
+            <div class="empty-state">No extracts written yet.</div>
+        }
+        else
+        {
+            @foreach (var file in _csvFiles)
+            {
+                <div class="file-row" @onclick="() => ToggleFile(file.FileName)">
+                    <span class="file-name">@file.FileName</span>
+                    <span class="file-meta">@file.RowCount rows &middot; @FormatSize(file.SizeBytes) &middot; @file.ModifiedUtc.ToLocalTime().ToString("HH:mm:ss")</span>
+                </div>
+                @if (_expandedFile == file.FileName)
+                {
+                    <div class="file-preview">
+                        @{ var rows = OutputService.ReadRows(file.FileName); }
+                        @if (rows is null)
+                        {
+                            <p class="empty-state">This file is no longer available — it may have been moved or deleted.</p>
+                        }
+                        else
+                        {
+                            <table>
+                                <thead>
+                                    <tr><th>Local Time</th><th>Volume</th></tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var row in rows)
+                                    {
+                                        <tr><td>@row.LocalTime</td><td>@row.Volume</td></tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    </div>
+                }
+            }
+        }
+    </div>
+</section>
+
+@code {
+    private List<LogEntry> _logEntries = [];
+    private List<LogEntry> _logEntriesNewestFirst = [];
+    private List<CsvFileInfo> _csvFiles = [];
+    private string _logFileLabel = "No log file found yet";
+    private DateTimeOffset _lastRefreshed = DateTimeOffset.Now;
+    private bool _needsAttention;
+    private string? _expandedFile;
+    private PeriodicTimer? _timer;
+    private CancellationTokenSource? _cts;
+
+    protected override void OnInitialized()
+    {
+        Refresh();
+        _cts = new CancellationTokenSource();
+        _timer = new PeriodicTimer(TimeSpan.FromSeconds(2));
+        _ = PollAsync(_cts.Token);
+    }
+
+    private async Task PollAsync(CancellationToken token)
+    {
+        try
+        {
+            while (await _timer!.WaitForNextTickAsync(token))
+            {
+                Refresh();
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+        }
+    }
+
+    private void Refresh()
+    {
+        _logEntries = LogService.ReadRecent().ToList();
+        _logEntriesNewestFirst = Enumerable.Reverse(_logEntries).ToList();
+        _logFileLabel = LogService.LatestLogFileName is { } name ? $"logs/{name}" : "No log file found yet";
+        _needsAttention = _logEntries.TakeLast(20).Any(e => e.Level is "WRN" or "ERR" or "FTL");
+        _csvFiles = OutputService.ListFiles().ToList();
+        _lastRefreshed = DateTimeOffset.Now;
+    }
+
+    private void ToggleFile(string fileName)
+    {
+        _expandedFile = _expandedFile == fileName ? null : fileName;
+    }
+
+    private static string FormatSize(long bytes) => bytes < 1024 ? $"{bytes} B" : $"{bytes / 1024.0:0.#} KB";
+
+    public async ValueTask DisposeAsync()
+    {
+        _cts?.Cancel();
+        _timer?.Dispose();
+        _cts?.Dispose();
+        await Task.CompletedTask;
+    }
+}

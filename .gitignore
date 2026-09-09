@@ -1,0 +1,24 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+
+## Test / coverage output
+TestResults/
+[Cc]overage/
+
+## Extract output (generated CSVs — not source)
+**/PowerPosition_*.csv
+
+## Worker runtime artifacts
+src/PowerPosition.Worker/logs/
+
+## IDE
+.vs/
+.vscode/
+*.swp
+
+## OS
+.DS_Store
+Thumbs.db

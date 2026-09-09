@@ -1,0 +1,324 @@
+:root {
+    --ground: #F3F5F7;
+    --surface: #FFFFFF;
+    --surface-2: #E7EBEF;
+    --border: #D7DCE1;
+    --text: #171B20;
+    --text-secondary: #55606B;
+    --text-faint: #8892A0;
+    --accent: #2E7C76;
+    --ok: #2F7A52;
+    --ok-soft: #E1EFE6;
+    --warn: #966423;
+    --warn-soft: #F3E6D2;
+    --critical: #B23A3E;
+    --critical-soft: #F7E1E2;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --ground: #12181F;
+        --surface: #1A222C;
+        --surface-2: #222C38;
+        --border: #2B3644;
+        --text: #E7EAED;
+        --text-secondary: #9AA5B1;
+        --text-faint: #6C7887;
+        --accent: #5FBDB5;
+        --ok: #6FC796;
+        --ok-soft: #1B2E22;
+        --warn: #E0A94A;
+        --warn-soft: #34291A;
+        --critical: #E5747A;
+        --critical-soft: #3A2224;
+    }
+}
+
+:root[data-theme="dark"] {
+    --ground: #12181F;
+    --surface: #1A222C;
+    --surface-2: #222C38;
+    --border: #2B3644;
+    --text: #E7EAED;
+    --text-secondary: #9AA5B1;
+    --text-faint: #6C7887;
+    --accent: #5FBDB5;
+    --ok: #6FC796;
+    --ok-soft: #1B2E22;
+    --warn: #E0A94A;
+    --warn-soft: #34291A;
+    --critical: #E5747A;
+    --critical-soft: #3A2224;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.app-shell {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 32px 24px 64px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.standalone-warning {
+    background: var(--warn-soft);
+    color: var(--warn);
+    border: 1px solid var(--warn);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+}
+
+.standalone-warning code {
+    font-family: ui-monospace, "Cascadia Mono", "Consolas", monospace;
+    background: var(--surface-2);
+    color: var(--text);
+    padding: 1px 5px;
+    border-radius: 4px;
+}
+
+.dashboard-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.dashboard-header h1 {
+    margin: 0 0 4px;
+    font-size: 22px;
+    font-weight: 600;
+}
+
+.subtitle {
+    margin: 0;
+    color: var(--text-secondary);
+    font-family: ui-monospace, "Cascadia Mono", "Consolas", monospace;
+    font-size: 12.5px;
+}
+
+.header-meta {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.meta-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 11px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-family: ui-monospace, "Cascadia Mono", "Consolas", monospace;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+}
+
+.meta-pill--ok {
+    background: var(--ok-soft);
+    color: var(--ok);
+    border-color: transparent;
+}
+
+.meta-pill--warn {
+    background: var(--warn-soft);
+    color: var(--warn);
+    border-color: transparent;
+}
+
+.meta-pill .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.panel-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+}
+
+.panel-head h2 {
+    margin: 0;
+    font-size: 13.5px;
+    font-weight: 600;
+}
+
+.panel-note {
+    font-size: 12px;
+    color: var(--text-faint);
+    font-family: ui-monospace, "Cascadia Mono", "Consolas", monospace;
+}
+
+.empty-state {
+    padding: 28px 18px;
+    color: var(--text-faint);
+    font-size: 13px;
+    text-align: center;
+}
+
+.log-panel {
+    max-height: 480px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.log-row {
+    display: grid;
+    grid-template-columns: 68px 42px 1fr;
+    gap: 10px;
+    padding: 8px 18px;
+    font-family: ui-monospace, "Cascadia Mono", "Consolas", monospace;
+    font-size: 12.5px;
+    border-top: 1px solid var(--border);
+    border-left: 3px solid transparent;
+    align-items: start;
+}
+
+.log-row:first-child {
+    border-top: none;
+}
+
+.log-time {
+    color: var(--text-faint);
+}
+
+.log-level {
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.log-message {
+    color: var(--text);
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.log-row--wrn {
+    border-left-color: var(--warn);
+    background: var(--warn-soft);
+}
+
+.log-row--wrn .log-level {
+    color: var(--warn);
+}
+
+.log-row--err, .log-row--ftl {
+    border-left-color: var(--critical);
+    background: var(--critical-soft);
+}
+
+.log-row--err .log-level, .log-row--ftl .log-level {
+    color: var(--critical);
+}
+
+.files-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.file-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 18px;
+    border-top: 1px solid var(--border);
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.file-row:first-child {
+    border-top: none;
+}
+
+.file-row:hover {
+    background: var(--surface-2);
+}
+
+.file-name {
+    font-family: ui-monospace, "Cascadia Mono", "Consolas", monospace;
+    color: var(--text);
+}
+
+.file-meta {
+    color: var(--text-faint);
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.file-preview {
+    padding: 0 18px 14px;
+    overflow-x: auto;
+}
+
+.file-preview table {
+    width: 100%;
+    max-width: 320px;
+    border-collapse: collapse;
+    font-size: 12.5px;
+    font-family: ui-monospace, "Cascadia Mono", "Consolas", monospace;
+}
+
+.file-preview th {
+    text-align: left;
+    font-size: 10.5px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    padding: 0 12px 6px 0;
+}
+
+.file-preview td {
+    padding: 2px 12px 2px 0;
+    color: var(--text-secondary);
+}
+
+#blazor-error-ui {
+    background: var(--critical-soft);
+    color: var(--critical);
+    bottom: 0;
+    box-shadow: 0 -1px 8px rgba(0, 0, 0, 0.15);
+    display: none;
+    left: 0;
+    padding: 0.9rem 1.25rem 0.9rem 1.25rem;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+    font-size: 13px;
+}
+
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    position: absolute;
+    right: 1rem;
+    top: 0.6rem;
+}
