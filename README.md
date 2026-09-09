@@ -3,6 +3,7 @@
 **Run:** `dotnet run --project src/PowerPosition.Worker` — writes a CSV immediately, then
 every hour (or `--interval <minutes>` / `--output <folder>`); prints a link to a live
 dashboard on startup.
+
 **Configure:** the same flags, or the matching `Extract` section in
 `appsettings.json`/environment variables — command line wins.
 **Day-ahead:** the brief above doesn't state which date "day ahead power position" means,
