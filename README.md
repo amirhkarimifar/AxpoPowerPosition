@@ -6,10 +6,12 @@ dashboard on startup.
 
 **Configure:** the same flags, or the matching `Extract` section in
 `appsettings.json`/environment variables — command line wins.
+
 **Day-ahead:** the brief above doesn't state which date "day ahead power position" means,
 so this defaults to requesting *tomorrow's* trading date — the standard day-ahead-market
 reading (today's report covers tomorrow's delivery). `--day-offset 0` requests today
 instead; either way, the worked example in this README is reproduced exactly as a test.
+
 **Build/test:** `dotnet build PowerPosition.sln` / `dotnet test PowerPosition.sln`.
 
 - `PowerPosition.Core` — the domain: DST-aware hourly aggregation, CSV writing, retry policy.
