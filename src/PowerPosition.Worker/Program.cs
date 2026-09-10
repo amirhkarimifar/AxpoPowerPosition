@@ -48,12 +48,14 @@ catch (IOException)
 
 var host = builder.Build();
 
+var lifetime = host.Services.GetRequiredService<IHostApplicationLifetime>();
 var dashboardProcess = DashboardLauncher.TryStart(
     builder.Environment.ContentRootPath,
-    host.Services.GetRequiredService<ILogger<Program>>());
+    host.Services.GetRequiredService<ILogger<Program>>(),
+    lifetime.ApplicationStopping);
 if (dashboardProcess is not null)
 {
-    DashboardLauncher.StopOnShutdown(dashboardProcess, host.Services.GetRequiredService<IHostApplicationLifetime>());
+    DashboardLauncher.StopOnShutdown(dashboardProcess, lifetime);
 }
 
 host.Run();
